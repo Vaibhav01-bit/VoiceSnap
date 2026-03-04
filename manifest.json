@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "VoiceSnap",
+  "version": "1.0",
+  "description": "Take screenshots using voice commands and automatically copy them to the clipboard.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "scripting",
+    "storage",
+    "offscreen",
+    "clipboardWrite",
+    "notifications",
+    "downloads"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background/service_worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "VoiceSnap"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "css": [
+        "styles/notification.css"
+      ],
+      "js": [
+        "content/content_script.js"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

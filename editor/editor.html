@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VoiceSnap Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #020617;
+            color: #e5e7eb;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        header {
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1f2937;
+            background: #020617;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 16px;
+            background: linear-gradient(to right, #22d3ee, #818cf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .toolbar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .tool-btn {
+            border-radius: 999px;
+            border: 1px solid #1f2937;
+            padding: 4px 10px;
+            font-size: 11px;
+            background: #020617;
+            color: #e5e7eb;
+            cursor: pointer;
+        }
+        .tool-btn.active {
+            border-color: #22d3ee;
+            background: rgba(34,211,238,0.08);
+        }
+        .tool-btn:hover {
+            border-color: #22d3ee;
+        }
+        .main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at top, rgba(37,99,235,0.2), transparent 55%);
+        }
+        .canvas-wrapper {
+            position: relative;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.8);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>VoiceSnap Editor</h1>
+        <div class="toolbar">
+            <button class="tool-btn" data-tool="arrow">Arrow</button>
+            <button class="tool-btn" data-tool="rect">Rect</button>
+            <button class="tool-btn" data-tool="highlight">Highlight</button>
+            <button class="tool-btn" data-tool="blur">Blur</button>
+            <button class="tool-btn" data-tool="text">Text</button>
+            <button class="tool-btn" id="copy-btn">Copy</button>
+            <button class="tool-btn" id="download-btn">Download</button>
+        </div>
+    </header>
+    <div class="main">
+        <div class="canvas-wrapper">
+            <canvas id="base"></canvas>
+            <canvas id="overlay" style="position:absolute;left:0;top:0;"></canvas>
+        </div>
+    </div>
+
+    <script type="module" src="editor.js"></script>
+</body>
+</html>

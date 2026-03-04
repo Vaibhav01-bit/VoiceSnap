@@ -1,0 +1,142 @@
+<html class="dark"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#0db9f2",
+            "background-light": "#f5f8f8",
+            "background-dark": "#020617", // slate-950
+          },
+          fontFamily: {
+            "display": ["Space Grotesk"]
+          },
+          borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      width: 350px;
+      height: 600px;
+      margin: 0;
+      overflow: hidden;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .neon-glow {
+      box-shadow: 0 0 20px rgba(13, 185, 242, 0.3);
+    }
+    .neon-text {
+      background: linear-gradient(90deg, #0db9f2, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex h-full w-full flex-col overflow-hidden">
+<!-- Header -->
+<div class="flex items-center justify-between px-5 pt-6 pb-4">
+<div class="flex items-center gap-2">
+<div class="size-8 rounded-lg bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-white text-xl">mic</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight neon-text">VoiceSnap</h2>
+</div>
+<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+<span class="size-2 rounded-full bg-primary animate-pulse"></span>
+<p class="text-[10px] font-bold uppercase tracking-wider text-primary">Ready</p>
+</div>
+</div>
+<!-- Main Voice Interaction Area -->
+<div class="flex flex-col items-center justify-center flex-1 px-6">
+<div class="relative group cursor-pointer">
+<!-- Glow Aura -->
+<div class="absolute -inset-4 rounded-full bg-primary/20 blur-2xl opacity-50 group-hover:opacity-80 transition-opacity"></div>
+<div class="absolute -inset-1 rounded-full bg-gradient-to-r from-primary to-purple-500 opacity-30 blur-md"></div>
+<!-- Glass Mic Button -->
+<div class="relative size-32 rounded-full glass flex items-center justify-center neon-glow border-white/20">
+<div class="size-24 rounded-full bg-slate-900/40 flex items-center justify-center border border-white/5">
+<span class="material-symbols-outlined text-5xl text-primary drop-shadow-[0_0_10px_rgba(13,185,242,0.8)]" style="font-variation-settings: 'FILL' 1">mic</span>
+</div>
+</div>
+</div>
+<p class="mt-8 text-sm font-medium text-slate-400 dark:text-slate-400 flex items-center gap-2">
+        Voice mode: say <span class="text-primary font-bold">"Hey Snap"</span>...
+      </p>
+</div>
+<!-- Recent Captures Section -->
+<div class="px-5 pb-4">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-sm font-bold text-slate-100 uppercase tracking-widest opacity-70">Recent Captures</h3>
+<button class="text-[11px] font-bold text-primary/80 hover:text-primary transition-colors uppercase tracking-wider">Clear</button>
+</div>
+<div class="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+<!-- Card 1 -->
+<div class="min-w-[100px] h-16 rounded-lg glass overflow-hidden relative group border-white/10">
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" data-alt="Abstract blue and purple geometric waves" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4RWvMPBaL2OhrlA9BvEUZeZO5RmyGeNKeawTJTlX-c16JTtqXjMyO961bIBDlp4ZU7pHgJpR_RSD1RT-Nzaa1DkPjjChLwngc7tKTfNTLG1O_fgNOcxCdyuJaMjROfX_IeJnkF5DkXvtU-JjROSy3ZXJGzvcT9tGY97uxfQZ5ORaE6Z2D3NQxPGJSz0k7vsw0CXtuSIhBdcA_PlRWLzjGZAzKu_3h2M0OILzidBO75MexUhPopdqK8h74rQ8ipomYuHX6RQdWEAPl"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+</div>
+<!-- Card 2 -->
+<div class="min-w-[100px] h-16 rounded-lg glass overflow-hidden relative group border-white/10">
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" data-alt="Vibrant digital 3d render shapes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeqWXjx3di0NFqTGByMLR5Ud1rlbxl4DHergyhhar897ztvBzcp8wAWloNCT_j-QFyR_eFMzI67N3GPAD8_oo_JXX29EJ_uyqr1FYKTofPbfDLonBg7edRQNt58iDlqp59tfn8viGT6NPe10aao3cpc2y3klMAx4ObXtigrOkt7KOqswvi2869yeIUFT5T4n5VGwVWHeQnynpDip2dKi9AVSsUbLP8tMoqwR9uqgV7nQnyGaZMlu6melVLpHdMyo6vSGI8YUNyeGk7"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+</div>
+<!-- Card 3 -->
+<div class="min-w-[100px] h-16 rounded-lg glass overflow-hidden relative group border-white/10">
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" data-alt="Soft colorful gradient abstract texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdyAPs1AoPnep91BNKJE_Nhx7OTQo_mHJe-HdSqY_6nupPdZPW8ZV_Wg6m7x-JXndzHGg40Cffe-MOIU4QJ8Iv-jN13oAM2aE8rLiEzIjHol1hHcpujZpi0Z2j3s4Nm4XckpDxqiwg2q96EvIHOYgUagK2x_fGzB71kdzR5tAjQg8ujDE9P5SXh4ASpvQBa0EwzQCua2SVd79Z0wJx_Qs_kEbzzDurGzX4Aj5ibq9Iey6BJX1hW5QKMVnRMn33BeYXM4w00ajLzDVn"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+</div>
+</div>
+</div>
+<!-- Common Commands Section -->
+<div class="px-5 pb-8">
+<h3 class="text-xs font-bold text-slate-100 uppercase tracking-widest opacity-70 mb-3">Common Commands</h3>
+<div class="flex flex-wrap gap-2">
+<div class="px-3 py-1.5 rounded-full glass border-white/5 text-[11px] font-medium text-slate-300 hover:bg-white/10 hover:text-primary cursor-pointer transition-all">
+          "Take screenshot"
+        </div>
+<div class="px-3 py-1.5 rounded-full glass border-white/5 text-[11px] font-medium text-slate-300 hover:bg-white/10 hover:text-primary cursor-pointer transition-all">
+          "Capture left side"
+        </div>
+<div class="px-3 py-1.5 rounded-full glass border-white/5 text-[11px] font-medium text-slate-300 hover:bg-white/10 hover:text-primary cursor-pointer transition-all">
+          "Save page as PDF"
+        </div>
+</div>
+</div>
+<!-- Bottom Nav Bar -->
+<div class="mt-auto border-t border-white/5 bg-slate-900/50 backdrop-blur-md px-6 py-3 flex items-center justify-between">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined text-2xl">home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">history</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">grid_view</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">settings</span>
+</a>
+</div>
+</div>
+
+```</body></html>
