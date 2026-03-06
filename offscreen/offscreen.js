@@ -1,6 +1,6 @@
 // offscreen/offscreen.js - Clipboard + Voice engine (wake-word)
 
-import { copyToClipboard } from '../clipboard/clipboard.js';
+import { copyToClipboard, copyToClipboardWithPermissions } from '../clipboard/clipboard.js';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
@@ -153,18 +153,8 @@ function handleConversation(rawTranscript) {
     // Use compromise global
     const nlp = window.nlp;
 
-    const hasWake = transcript.includes('hey snap');
-
-    if (hasWake) {
-        assistantActive = true;
-        setAssistantStatus('listening');
-        speak('Yes, how can I help?');
-        transcript = transcript.replace(/hey snap/gi, '').trim();
-        if (!transcript) return;
-    }
-
-    // Require wake-word unless already active
-    if (!assistantActive) return;
+    // Assistant is always active once voice mode is enabled
+    assistantActive = true;
 
     const text = transcript.replace(/\s+/g, ' ').trim();
     if (!text) return;
@@ -345,10 +335,10 @@ function startVoiceEngine() {
 
     recognition.onstart = () => {
         shouldContinueListening = true;
-        assistantActive = true;
+        assistantActive = true; // Active immediately
         setListeningState(true, null);
         setAssistantStatus('listening');
-        speak('Listening activated.');
+        speak('Voice system ready.');
     };
 
     recognition.onresult = (event) => {

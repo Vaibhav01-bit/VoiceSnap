@@ -342,3 +342,562 @@ body {
 .cursor-pointer {
     cursor: pointer;
 }
+
+/* ─── Magic UI Enhancements ─── */
+
+/* 1. Retro Grid */
+.retro-grid {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.2;
+    background-image: linear-gradient(to right, rgba(13, 185, 242, 0.1) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(13, 185, 242, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(circle at center, black, transparent 80%);
+    animation: grid-fade 8s ease-in-out infinite alternate;
+}
+
+@keyframes grid-fade {
+    0% {
+        opacity: 0.1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0.3;
+        transform: translateY(-10px);
+    }
+}
+
+/* 2. Border Beam */
+@property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+.border-beam-container {
+    position: relative;
+    padding: 1px;
+    border-radius: inherit;
+    overflow: hidden;
+}
+
+.border-beam {
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: conic-gradient(from var(--angle), transparent 70%, var(--primary) 85%, #a855f7 100%);
+    animation: border-beam-spin 4s linear infinite;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.border-beam.active {
+    opacity: 1;
+}
+
+@keyframes border-beam-spin {
+    from {
+        --angle: 0deg;
+    }
+
+    to {
+        --angle: 360deg;
+    }
+}
+
+/* 3. Marquee */
+.marquee-container {
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    overflow: hidden;
+    width: 100%;
+}
+
+.marquee-content {
+    display: flex;
+    gap: 0.75rem;
+    width: max-content;
+    animation: marquee-scroll 20s linear infinite;
+}
+
+@keyframes marquee-scroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+.marquee-content:hover {
+    animation-play-state: paused;
+}
+
+/* 4. Enhanced Glass */
+.glass-premium {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* 5. Shimmer Effect */
+.shimmer-text {
+    background: linear-gradient(90deg, #94a3b8 0%, #ffffff 50%, #94a3b8 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer-text 3s linear infinite;
+}
+
+@keyframes shimmer-text {
+    to {
+        background-position: 200% center;
+    }
+}
+
+.shimmer-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer-btn::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    animation: shimmer-btn 3s infinite;
+}
+
+@keyframes shimmer-btn {
+    0% {
+        transform: translate(-100%, -100%) rotate(45deg);
+    }
+
+    100% {
+        transform: translate(100%, 100%) rotate(45deg);
+    }
+}
+
+/* ─── 3D Animation Enhancements ─── */
+
+/* 1. Floating Particles */
+.particles-container {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 50%;
+    opacity: 0.4;
+    animation: particle-float 15s infinite ease-in-out;
+}
+
+@keyframes particle-float {
+    0%, 100% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0.4;
+    }
+    25% {
+        transform: translateY(-30px) translateX(10px) scale(1.2);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateY(-50px) translateX(-10px) scale(0.8);
+        opacity: 0.3;
+    }
+    75% {
+        transform: translateY(-20px) translateX(15px) scale(1.1);
+        opacity: 0.5;
+    }
+}
+
+/* 2. 3D Tilt Effect Base */
+.tilt-3d {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transition: transform 0.3s ease;
+}
+
+.tilt-3d-inner {
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+}
+
+/* 3. Audio Wave Bars */
+.audio-wave {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 24px;
+    margin-top: 1rem;
+}
+
+.wave-bar {
+    width: 3px;
+    height: 8px;
+    background: linear-gradient(to top, var(--primary), #a855f7);
+    border-radius: 2px;
+    transform-origin: bottom;
+    transition: transform 0.1s ease;
+}
+
+.audio-wave.active .wave-bar {
+    animation: wave-animation 0.8s ease-in-out infinite;
+}
+
+.wave-bar:nth-child(1) { animation-delay: 0s; }
+.wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; }
+.wave-bar:nth-child(5) { animation-delay: 0.4s; }
+.wave-bar:nth-child(6) { animation-delay: 0.5s; }
+.wave-bar:nth-child(7) { animation-delay: 0.4s; }
+.wave-bar:nth-child(8) { animation-delay: 0.3s; }
+.wave-bar:nth-child(9) { animation-delay: 0.2s; }
+.wave-bar:nth-child(10) { animation-delay: 0.1s; }
+
+@keyframes wave-animation {
+    0%, 100% {
+        transform: scaleY(0.3);
+    }
+    50% {
+        transform: scaleY(1);
+    }
+}
+
+/* 4. Orbiting Rings */
+.orbit-ring {
+    position: absolute;
+    inset: -20px;
+    border: 1px solid rgba(13, 185, 242, 0.3);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.5s ease;
+}
+
+.orbit-ring.active {
+    opacity: 1;
+    animation: orbit-spin 8s linear infinite;
+}
+
+.orbit-ring:nth-child(2) {
+    inset: -30px;
+    animation-duration: 12s;
+    animation-direction: reverse;
+    border-color: rgba(168, 85, 247, 0.2);
+}
+
+.orbit-ring:nth-child(3) {
+    inset: -40px;
+    animation-duration: 16s;
+    border-color: rgba(13, 185, 242, 0.15);
+}
+
+@keyframes orbit-spin {
+    from {
+        transform: rotate(0deg) scale(0.8);
+    }
+    to {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+/* 5. 3D Mic Button Pulse */
+.mic-pulse-3d {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(13, 185, 242, 0.4) 0%, transparent 70%);
+    animation: mic-pulse-wave 2s ease-out infinite;
+    opacity: 0;
+    transform: scale(0.5);
+}
+
+.mic-pulse-3d.active {
+    opacity: 1;
+}
+
+.mic-pulse-3d:nth-child(1) { animation-delay: 0s; }
+.mic-pulse-3d:nth-child(2) { animation-delay: 0.6s; }
+.mic-pulse-3d:nth-child(3) { animation-delay: 1.2s; }
+
+@keyframes mic-pulse-wave {
+    0% {
+        transform: scale(0.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* 6. Enhanced History Card 3D */
+.history-card-3d {
+    transform-style: preserve-3d;
+    perspective: 800px;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.history-card-3d:hover {
+    transform: translateY(-8px) rotateX(5deg) rotateY(-5deg);
+}
+
+.history-card-3d::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, rgba(13, 185, 242, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.history-card-3d:hover::before {
+    opacity: 1;
+}
+
+/* 7. Command Tag 3D Lift */
+.command-tag-3d {
+    transform-style: preserve-3d;
+    perspective: 500px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateZ(0);
+}
+
+.command-tag-3d:hover {
+    transform: translateY(-4px) translateZ(10px);
+    box-shadow: 
+        0 10px 20px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(13, 185, 242, 0.3),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.command-tag-3d:active {
+    transform: translateY(-2px) translateZ(5px);
+}
+
+/* 8. Morphing Status Badge */
+.status-badge-3d {
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transform-style: preserve-3d;
+}
+
+.status-badge-3d.listening {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(74, 222, 128, 0.4);
+}
+
+.status-badge-3d.error {
+    transform: scale(1.02);
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
+}
+
+/* 9. Neon Glow Enhancement */
+.neon-glow-3d {
+    position: relative;
+}
+
+.neon-glow-3d::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: inherit;
+    background: inherit;
+    filter: blur(15px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.neon-glow-3d.active::after {
+    opacity: 0.5;
+    animation: neon-pulse 2s ease-in-out infinite;
+}
+
+@keyframes neon-pulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* 10. Entrance Animations */
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }
+
+/* 11. Reflection Effect */
+.has-reflection {
+    position: relative;
+}
+
+.has-reflection::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.05), transparent);
+    transform: scaleY(-1);
+    mask-image: linear-gradient(to bottom, black, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+    pointer-events: none;
+}
+
+/* 12. Sound Visualizer Ring */
+.sound-visualizer {
+    position: absolute;
+    inset: -60px;
+    pointer-events: none;
+}
+
+.visualizer-circle {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(13, 185, 242, 0.2);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0.5);
+}
+
+.visualizer-circle.active {
+    animation: visualizer-pulse 2s ease-out infinite;
+}
+
+.visualizer-circle:nth-child(1) { animation-delay: 0s; }
+.visualizer-circle:nth-child(2) { animation-delay: 0.5s; }
+.visualizer-circle:nth-child(3) { animation-delay: 1s; }
+
+@keyframes visualizer-pulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* 13. Logo 3D Effect */
+.logo-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+}
+
+.logo-3d:hover {
+    transform: rotateY(10deg) rotateX(5deg);
+}
+
+.logo-icon-3d {
+    transform-style: preserve-3d;
+    animation: logo-float 3s ease-in-out infinite;
+}
+
+@keyframes logo-float {
+    0%, 100% {
+        transform: translateY(0) rotateX(0);
+    }
+    50% {
+        transform: translateY(-3px) rotateX(5deg);
+    }
+}
+
+/* 14. Glass Shimmer */
+.glass-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.glass-shimmer:hover::before {
+    left: 100%;
+}
+
+/* 15. Focus Ring 3D */
+.focus-ring-3d {
+    position: relative;
+}
+
+.focus-ring-3d:focus {
+    outline: none;
+}
+
+.focus-ring-3d:focus::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(45deg, var(--primary), #a855f7);
+    z-index: -1;
+    animation: focus-ring-spin 2s linear infinite;
+    opacity: 0.6;
+}
+
+@keyframes focus-ring-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -517,9 +517,9 @@ Full page screenshot
 
 Phase v1.2
 
-Wake word detection
+Voice recognition
 Example:
-"Hey Snap, take screenshot"
+"Take screenshot"
 
 Multi-language support
 
