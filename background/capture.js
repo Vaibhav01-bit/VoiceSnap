@@ -1,8 +1,8 @@
 // background/capture.js - Core screenshot capture logic
 
-export async function captureVisibleTab() {
+export async function captureVisibleTab(windowId = null) {
     try {
-        return await chrome.tabs.captureVisibleTab(null, { format: 'png' });
+        return await chrome.tabs.captureVisibleTab(windowId, { format: 'png' });
     } catch (e) {
         throw new Error('Restricted page - cannot capture');
     }
@@ -37,51 +37,83 @@ export async function handleCapturePresetRegion(preset, dataUrl) {
     return await blobToDataUrl(croppedBlob);
 }
 
-export async function captureFullPage(notifyUser, handleProxyCopyToClipboard, saveToHistory, sendCapturePreview) {
-    try {
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (!tabs[0]) return;
-        const activeTab = tabs[0];
+export async function captureFullPage(notifyUser, handleProxyCopyToClipboard, saveToHistory, sendCapturePreview, activeTabOverride = null) {
+    let activeTab = null;
+    let originalScrollY = 0;
 
-        // Ask content script for page metrics
-        const metrics = await new Promise((resolve) => {
-            const listener = (request) => {
-                if (request.type === 'PAGE_METRICS' && request.metrics) {
-                    chrome.runtime.onMessage.removeListener(listener);
-                    resolve(request.metrics);
-                }
-            };
-            chrome.runtime.onMessage.addListener(listener);
-            chrome.tabs.sendMessage(activeTab.id, { type: 'GET_PAGE_METRICS' });
-        });
+    try {
+        activeTab = activeTabOverride;
+        if (!activeTab) {
+            [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+        }
+        if (!activeTab) {
+            [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        }
+        if (!activeTab) return;
+
+        const metrics = await waitForRuntimeMessage(
+            'PAGE_METRICS',
+            () => chrome.tabs.sendMessage(activeTab.id, { type: 'GET_PAGE_METRICS' })
+        );
+
+        if (!metrics) {
+            throw new Error('Unable to read page metrics');
+        }
 
         const totalHeight = metrics.totalHeight;
         const viewportHeight = metrics.viewportHeight;
         const devicePixelRatio = metrics.devicePixelRatio || 1;
+        originalScrollY = metrics.scrollY || 0;
+        const stickyTopHeight = metrics.stickyTopHeight || 0;
+        const maxScrollY = Math.max(0, totalHeight - viewportHeight);
+        const targetPositions = [];
 
-        let y = 0;
+        console.log('[VoiceSnap][FullPage] metrics:', {
+            totalHeight,
+            viewportHeight,
+            devicePixelRatio,
+            originalScrollY,
+            stickyTopHeight
+        });
+
+        for (let y = 0; y <= maxScrollY; y += viewportHeight) {
+            targetPositions.push(Math.min(y, maxScrollY));
+        }
+
+        if (!targetPositions.length) {
+            targetPositions.push(0);
+        }
+
         const bitmaps = [];
+        const seenScrollPositions = new Set();
 
-        while (y < totalHeight - 1) {
-            await new Promise((resolve) => {
-                const listener = (request) => {
-                    if (request.type === 'SCROLL_DONE') {
-                        chrome.runtime.onMessage.removeListener(listener);
-                        resolve();
-                    }
-                };
-                chrome.runtime.onMessage.addListener(listener);
-                chrome.tabs.sendMessage(activeTab.id, { type: 'SCROLL_TO', y });
-            });
+        for (const targetY of targetPositions) {
+            const scrolled = await waitForRuntimeMessage(
+                'SCROLL_DONE',
+                () => chrome.tabs.sendMessage(activeTab.id, { type: 'SCROLL_TO', y: targetY })
+            );
 
-            await new Promise(r => setTimeout(r, 150));
+            if (!scrolled) {
+                throw new Error('Unable to scroll page');
+            }
 
-            let dataUrl = await captureVisibleTab();
+            const actualScrollY = typeof scrolled.y === 'number' ? scrolled.y : targetY;
+            console.log('[VoiceSnap][FullPage] scroll step:', { targetY, actualScrollY });
+            if (seenScrollPositions.has(actualScrollY)) {
+                continue;
+            }
+            seenScrollPositions.add(actualScrollY);
+
+            await new Promise(r => setTimeout(r, 275));
+
+            let dataUrl = await captureVisibleTab(activeTab.windowId ?? null);
             const blob = await (await fetch(dataUrl)).blob();
             const bitmap = await createImageBitmap(blob);
-            bitmaps.push({ bitmap, y });
+            bitmaps.push({ bitmap, y: actualScrollY });
+        }
 
-            y += viewportHeight;
+        if (!bitmaps.length) {
+            throw new Error('No page segments captured');
         }
 
         const fullWidth = bitmaps[0].bitmap.width;
@@ -90,13 +122,29 @@ export async function captureFullPage(notifyUser, handleProxyCopyToClipboard, sa
         const canvas = new OffscreenCanvas(fullWidth, totalPxHeight);
         const ctx = canvas.getContext('2d');
 
-        for (const segment of bitmaps) {
+        for (let index = 0; index < bitmaps.length; index += 1) {
+            const segment = bitmaps[index];
             const offsetY = Math.round(segment.y * devicePixelRatio);
-            ctx.drawImage(segment.bitmap, 0, offsetY);
+            const stickyTopPx = index === 0 ? 0 : Math.round(stickyTopHeight * devicePixelRatio);
+            const remainingHeightPx = Math.max(0, totalPxHeight - offsetY);
+            const sourceHeight = Math.min(Math.max(0, segment.bitmap.height - stickyTopPx), remainingHeightPx);
+            if (sourceHeight <= 0) continue;
+            ctx.drawImage(
+                segment.bitmap,
+                0,
+                stickyTopPx,
+                segment.bitmap.width,
+                sourceHeight,
+                0,
+                offsetY + stickyTopPx,
+                segment.bitmap.width,
+                sourceHeight
+            );
         }
 
         const finalBlob = await canvas.convertToBlob({ type: 'image/png' });
         const finalDataUrl = await blobToDataUrl(finalBlob);
+        console.log('[VoiceSnap][FullPage] stitch completed');
 
         await handleProxyCopyToClipboard(finalDataUrl);
         const entry = await saveToHistory(finalDataUrl, activeTab);
@@ -104,14 +152,27 @@ export async function captureFullPage(notifyUser, handleProxyCopyToClipboard, sa
     } catch (err) {
         console.error('Full page capture error:', err);
         notifyUser('error', 'Full page capture failed.');
+    } finally {
+        if (activeTab?.id) {
+            await waitForRuntimeMessage(
+                'SCROLL_DONE',
+                () => chrome.tabs.sendMessage(activeTab.id, { type: 'SCROLL_TO', y: originalScrollY }),
+                2000
+            );
+        }
     }
 }
 
 export async function handleCaptureArea(activeTab) {
-    chrome.tabs.sendMessage(activeTab.id, { type: 'START_CROP_SELECTION' }, () => {
-        if (chrome.runtime.lastError) {
-            console.error('Failed to start crop selection:', chrome.runtime.lastError);
-        }
+    return await new Promise((resolve) => {
+        chrome.tabs.sendMessage(activeTab.id, { type: 'START_CROP_SELECTION' }, () => {
+            if (chrome.runtime.lastError) {
+                console.error('Failed to start crop selection:', chrome.runtime.lastError);
+                resolve(false);
+                return;
+            }
+            resolve(true);
+        });
     });
 }
 
@@ -134,12 +195,22 @@ export async function handleCaptureElement(target, activeTab, handleElementRectC
 
     if (result) {
         await handleElementRectCapture(result, activeTab);
+        return true;
     }
+
+    return false;
 }
 
 export async function handleElementRectCapture(rect, tab, handleProxyCopyToClipboard, saveToHistory, sendCapturePreview) {
     try {
-        let dataUrl = await captureVisibleTab();
+        console.log('[VoiceSnap][Area] capture requested:', rect);
+
+        if (!rect?.viewportWidth || !rect?.viewportHeight) {
+            throw new Error('Missing viewport metrics for crop selection');
+        }
+
+        let dataUrl = await captureVisibleTab(tab?.windowId ?? null);
+        console.log('[VoiceSnap][Area] screenshot captured');
         const blob = await (await fetch(dataUrl)).blob();
         const bitmap = await createImageBitmap(blob);
 
@@ -157,12 +228,15 @@ export async function handleElementRectCapture(rect, tab, handleProxyCopyToClipb
 
         const croppedBlob = await canvas.convertToBlob({ type: 'image/png' });
         const croppedDataUrl = await blobToDataUrl(croppedBlob);
+        console.log('[VoiceSnap][Area] crop completed');
 
         await handleProxyCopyToClipboard(croppedDataUrl);
         const entry = await saveToHistory(croppedDataUrl, tab);
         await sendCapturePreview(entry);
+        return { dataUrl: croppedDataUrl, entry };
     } catch (err) {
         console.error('Rect capture error:', err);
+        throw err;
     }
 }
 
@@ -172,6 +246,32 @@ export function blobToDataUrl(blob) {
         reader.onloadend = () => resolve(reader.result);
         reader.onerror = reject;
         reader.readAsDataURL(blob);
+    });
+}
+
+function waitForRuntimeMessage(expectedType, trigger, timeoutMs = 4000) {
+    return new Promise((resolve) => {
+        const timeoutId = setTimeout(() => {
+            chrome.runtime.onMessage.removeListener(listener);
+            resolve(null);
+        }, timeoutMs);
+
+        function listener(message) {
+            if (message.type !== expectedType) return;
+            clearTimeout(timeoutId);
+            chrome.runtime.onMessage.removeListener(listener);
+            resolve(message.metrics || message.result || message);
+        }
+
+        chrome.runtime.onMessage.addListener(listener);
+
+        try {
+            trigger();
+        } catch (error) {
+            clearTimeout(timeoutId);
+            chrome.runtime.onMessage.removeListener(listener);
+            resolve(null);
+        }
     });
 }
 

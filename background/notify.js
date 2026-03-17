@@ -1,13 +1,14 @@
 // background/notify.js - Messaging to content scripts
 
 export function notifyUser(status, message) {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (!tabs[0]?.id) {
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+        const tab = tabs[0];
+        if (!tab?.id) {
             fallbackNotification(status, message);
             return;
         }
 
-        chrome.tabs.sendMessage(tabs[0].id, {
+        chrome.tabs.sendMessage(tab.id, {
             type: 'SHOW_NOTIFICATION',
             status,
             message
@@ -27,9 +28,10 @@ function fallbackNotification(status, message) {
 }
 
 export async function sendCapturePreview(entry) {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (!tabs[0]?.id) return;
-        chrome.tabs.sendMessage(tabs[0].id, {
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+        const tab = tabs[0];
+        if (!tab?.id) return;
+        chrome.tabs.sendMessage(tab.id, {
             type: 'SHOW_CAPTURE_PREVIEW',
             preview: {
                 id: entry.id,

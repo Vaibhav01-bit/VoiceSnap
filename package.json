@@ -4,7 +4,8 @@
   "description": "",
   "main": "generate_icons.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "validate": "node scripts/validate-extension.js",
+    "test": "node scripts/validate-extension.js"
   },
   "keywords": [],
   "author": "",

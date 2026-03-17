@@ -4,118 +4,656 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <script src="compromise.min.js"></script>
+    <title>VoiceSnap</title>
     <script src="popup.js" type="module"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
         rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
-    <link href="tailwind.css" rel="stylesheet">
     <style>
+        :root {
+            color-scheme: dark;
+            --bg: #041321;
+            --panel: rgba(9, 23, 38, 0.86);
+            --panel-strong: rgba(10, 28, 46, 0.96);
+            --line: rgba(125, 211, 252, 0.14);
+            --line-strong: rgba(125, 211, 252, 0.28);
+            --text: #e0f2fe;
+            --muted: #89a6bf;
+            --accent: #38bdf8;
+            --accent-2: #22c55e;
+            --danger: #fb7185;
+            --shadow: 0 22px 44px rgba(0, 0, 0, 0.38);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            width: 350px;
-            height: 580px;
-            min-width: 350px;
-            min-height: 580px;
+            width: 390px;
+            min-width: 390px;
+            min-height: 640px;
             margin: 0;
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), transparent 42%),
+                radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.16), transparent 34%),
+                linear-gradient(180deg, #03111d 0%, #041827 100%);
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .shell {
+            position: relative;
+            min-height: 640px;
+            padding: 18px;
             overflow: hidden;
-            background-color: #020617;
-            /* Essential for dark theme even if CSS is slow */
+        }
+
+        .shell::before,
+        .shell::after {
+            content: '';
+            position: absolute;
+            inset: auto;
+            pointer-events: none;
+        }
+
+        .shell::before {
+            top: -90px;
+            right: -120px;
+            width: 220px;
+            height: 220px;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.18);
+            filter: blur(24px);
+        }
+
+        .shell::after {
+            left: -80px;
+            bottom: -100px;
+            width: 200px;
+            height: 200px;
+            border-radius: 999px;
+            background: rgba(34, 197, 94, 0.12);
+            filter: blur(30px);
+        }
+
+        .stack {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            gap: 14px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 18px;
+        }
+
+        .brand {
+            display: grid;
+            gap: 4px;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .subtle {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--line-strong);
+            background: rgba(4, 19, 33, 0.72);
+            align-self: start;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: var(--accent);
+            box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.12);
+        }
+
+        .hero {
+            display: grid;
+            gap: 16px;
+            padding: 18px;
+        }
+
+        .tab-card {
+            display: grid;
+            gap: 6px;
+            padding: 14px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(2, 132, 199, 0.04));
+            border: 1px solid rgba(125, 211, 252, 0.2);
+        }
+
+        .tab-title {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .stat {
+            padding: 12px;
+            border-radius: 16px;
+            background: rgba(4, 19, 33, 0.72);
+            border: 1px solid var(--line);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--muted);
+        }
+
+        .stat-value {
+            margin-top: 6px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .voice-grid {
+            display: grid;
+            grid-template-columns: 92px 1fr;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .mic-button {
+            width: 92px;
+            height: 92px;
+            border: 1px solid rgba(125, 211, 252, 0.28);
+            border-radius: 28px;
+            background:
+                radial-gradient(circle at top, rgba(56, 189, 248, 0.34), transparent 58%),
+                rgba(5, 20, 34, 0.9);
+            color: var(--text);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+            box-shadow: 0 18px 28px rgba(0, 0, 0, 0.28);
+        }
+
+        .mic-button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(125, 211, 252, 0.48);
+        }
+
+        .mic-button.active {
+            border-color: rgba(34, 197, 94, 0.5);
+            box-shadow: 0 0 0 10px rgba(34, 197, 94, 0.08), 0 18px 28px rgba(0, 0, 0, 0.32);
+        }
+
+        .mic-glyph {
+            font-size: 30px;
+        }
+
+        .voice-copy {
+            display: grid;
+            gap: 8px;
+        }
+
+        .voice-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .chip,
+        .inline-btn {
+            border: 1px solid var(--line);
+            background: rgba(4, 19, 33, 0.72);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .chip:hover,
+        .inline-btn:hover,
+        .quick-action:hover,
+        .history-action:hover,
+        .primary-btn:hover {
+            border-color: var(--line-strong);
+        }
+
+        .section {
+            padding: 16px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .quick-action {
+            display: grid;
+            gap: 6px;
+            text-align: left;
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            background: rgba(4, 19, 33, 0.72);
+            cursor: pointer;
+        }
+
+        .quick-action strong {
+            font-size: 13px;
+        }
+
+        .quick-action span {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        .command-box {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+        }
+
+        .command-input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(4, 19, 33, 0.72);
+            color: var(--text);
+            padding: 12px 14px;
+            outline: none;
+        }
+
+        .command-input:focus {
+            border-color: var(--line-strong);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+        }
+
+        .primary-btn {
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(14, 165, 233, 0.08));
+            color: var(--text);
+            padding: 0 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .settings {
+            display: grid;
+            gap: 10px;
+        }
+
+        .setting {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(4, 19, 33, 0.72);
+            border: 1px solid var(--line);
+        }
+
+        .setting-copy {
+            display: grid;
+            gap: 4px;
+        }
+
+        .toggle {
+            appearance: none;
+            width: 42px;
+            height: 24px;
+            border-radius: 999px;
+            background: rgba(100, 116, 139, 0.4);
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.18s ease;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: white;
+            transition: transform 0.18s ease;
+        }
+
+        .toggle:checked {
+            background: rgba(56, 189, 248, 0.78);
+        }
+
+        .toggle:checked::after {
+            transform: translateX(18px);
+        }
+
+        .history-toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .history-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .history-card {
+            display: grid;
+            grid-template-columns: 84px 1fr;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 16px;
+            background: rgba(4, 19, 33, 0.72);
+            border: 1px solid var(--line);
+        }
+
+        .history-thumb {
+            width: 84px;
+            height: 64px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .history-copy {
+            display: grid;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .history-title {
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pill-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            padding: 4px 7px;
+            border-radius: 999px;
+            border: 1px solid rgba(125, 211, 252, 0.2);
+            background: rgba(14, 165, 233, 0.08);
+            color: #bae6fd;
+        }
+
+        .history-meta {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .history-action {
+            padding: 6px 10px;
+            font-size: 11px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .history-action.favorite {
+            color: #facc15;
+        }
+
+        .empty {
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px dashed rgba(125, 211, 252, 0.22);
+            color: var(--muted);
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .error {
+            color: #fecdd3;
+            font-size: 12px;
+            line-height: 1.45;
+            display: none;
         }
     </style>
 </head>
 
-<body class="dark">
-    <div
-        class="relative flex h-full w-full flex-col bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 overflow-hidden">
-
-        <!-- 1. Retro Grid Background -->
-        <div class="retro-grid"></div>
-
-        <!-- Header -->
-        <div class="flex items-center justify-between px-5 pt-6 pb-4 relative z-10">
-            <div class="flex items-center gap-2">
-                <div
-                    class="size-8 rounded-lg bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shadow-lg shadow-primary/20">
-                    <span class="material-symbols-outlined text-white text-xl">mic</span>
+<body>
+    <main class="shell">
+        <div class="stack">
+            <section class="panel header">
+                <div class="brand">
+                    <div class="eyebrow">Voice-driven capture</div>
+                    <h1>VoiceSnap</h1>
+                    <p class="subtle">Faster screenshots with voice, quick actions, and better follow-up tools.</p>
                 </div>
-                <h2 class="text-xl font-bold tracking-tight neon-text">VoiceSnap</h2>
-            </div>
-            <div id="status-badge"
-                class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 transition-all duration-300">
-                <span id="status-dot" class="size-2 rounded-full bg-primary transition-all duration-300"></span>
-                <p id="status-text" class="text-[10px] font-bold uppercase tracking-wider text-primary">Ready</p>
-            </div>
-        </div>
-        <!-- Main Voice Interaction Area -->
-        <div class="flex flex-col items-center justify-center flex-1 px-6 relative z-10">
-            <div id="mic-btn" class="relative group cursor-pointer w-32 h-32 flex items-center justify-center">
+                <div class="status" id="status-badge">
+                    <span class="status-dot" id="status-dot"></span>
+                    <span id="status-text">Ready</span>
+                </div>
+            </section>
 
-                <!-- 2. Border Beam Effect -->
-                <div class="border-beam-container absolute inset-0 rounded-full">
-                    <div id="border-beam" class="border-beam"></div>
+            <section class="panel hero">
+                <div class="tab-card">
+                    <div class="eyebrow">Current page</div>
+                    <div class="tab-title" id="tab-title">Loading current tab…</div>
+                    <div class="subtle" id="tab-domain">Waiting for tab context</div>
                 </div>
 
-                <!-- Glow Aura -->
-                <div id="mic-aura"
-                    class="absolute -inset-4 rounded-full bg-primary/20 blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-300">
-                </div>
-                <div
-                    class="absolute -inset-1 rounded-full bg-gradient-to-r from-primary to-purple-500 opacity-30 blur-md">
-                </div>
-                <!-- Glass Mic Button -->
-                <div id="mic-indicator"
-                    class="relative size-32 rounded-full glass flex items-center justify-center border-white/20 transition-all duration-300 group-hover:scale-105">
-                    <div
-                        class="size-24 rounded-full bg-slate-900/40 flex items-center justify-center border border-white/5 transition-all duration-300">
-                        <span
-                            class="material-symbols-outlined text-5xl text-primary drop-shadow-[0_0_10px_rgba(13,185,242,0.8)] transition-all duration-300"
-                            style="font-variation-settings: 'FILL' 1">mic</span>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-label">Captured</div>
+                        <div class="stat-value" id="stats-total">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Today</div>
+                        <div class="stat-value" id="stats-today">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Last mode</div>
+                        <div class="stat-value" id="stats-mode">None</div>
                     </div>
                 </div>
-            </div>
-            <p class="mt-8 text-sm font-medium text-slate-400 dark:text-slate-400 flex items-center gap-2">
-                Voice mode is active. Speak a command...
-            </p>
-            <div id="error-msg" class="w-full mt-4 text-center text-xs text-red-400 hidden"></div>
-        </div>
 
-        <!-- 3. Recent Captures Section (Marquee enabled in JS) -->
-        <div class="px-5 pb-4 relative z-10">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-bold shimmer-text uppercase tracking-widest opacity-90">Recent Captures</h3>
-                <button id="clear-history"
-                    class="text-[11px] font-bold text-primary/80 hover:text-primary transition-colors uppercase tracking-wider shimmer-btn px-2 py-1 rounded">Clear</button>
-            </div>
-            <div id="history-container" class="marquee-container">
-                <div id="history-grid" class="flex gap-3 pb-2 no-scrollbar" style="height: 72px;">
-                    <!-- Rendered via JS -->
-                    <div
-                        class="w-full h-16 rounded-lg glass-premium flex justify-center items-center text-slate-400 text-[11px] border-dashed">
-                        No captures yet</div>
+                <div class="voice-grid">
+                    <button class="mic-button" id="mic-btn" type="button" aria-label="Toggle voice mode">
+                        <span class="mic-glyph">🎙</span>
+                    </button>
+                    <div class="voice-copy">
+                        <div>
+                            <h2 class="section-title" id="voice-title">Voice mode is idle</h2>
+                            <p class="subtle" id="voice-hint">Use the mic for hands-free capture or run a typed command below.</p>
+                        </div>
+                        <div class="voice-actions">
+                            <button class="chip suggested-command" data-command="capture full page" type="button">Full page</button>
+                            <button class="chip suggested-command" data-command="capture image" type="button">Image</button>
+                            <button class="chip suggested-command" data-command="show gallery" type="button">Gallery</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                <div class="error" id="error-msg"></div>
+            </section>
+
+            <section class="panel section">
+                <div class="section-head">
+                    <h2 class="section-title">Quick capture</h2>
+                    <button class="inline-btn" id="open-gallery" type="button">Open gallery</button>
+                </div>
+                <div class="action-grid">
+                    <button class="quick-action" data-action="capture_visible" type="button">
+                        <strong>Visible tab</strong>
+                        <span>Fast screenshot of what is on screen now.</span>
+                    </button>
+                    <button class="quick-action" data-action="capture_full_page" type="button">
+                        <strong>Full page</strong>
+                        <span>Stitch the whole scrollable page into one image.</span>
+                    </button>
+                    <button class="quick-action" data-action="capture_area" type="button">
+                        <strong>Select area</strong>
+                        <span>Draw the region you want and capture only that.</span>
+                    </button>
+                    <button class="quick-action" data-action="capture_hover" type="button">
+                        <strong>Hovered element</strong>
+                        <span>Capture the element currently under your cursor.</span>
+                    </button>
+                    <button class="quick-action" data-action="capture_image" type="button">
+                        <strong>Primary image</strong>
+                        <span>Grab the first visible image on the page.</span>
+                    </button>
+                    <button class="quick-action" data-action="capture_code" type="button">
+                        <strong>Code block</strong>
+                        <span>Useful for docs, terminals, and snippets.</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="panel section">
+                <div class="section-head">
+                    <h2 class="section-title">Command runner</h2>
+                    <div class="subtle">Examples: “capture left side”, “download last screenshot”</div>
+                </div>
+                <div class="command-box">
+                    <input class="command-input" id="command-input" type="text" placeholder="Type a command..." />
+                    <button class="primary-btn" id="run-command" type="button">Run</button>
+                </div>
+                <div class="chip-row" id="recent-commands"></div>
+            </section>
+
+            <section class="panel section">
+                <div class="section-head">
+                    <h2 class="section-title">Capture settings</h2>
+                    <div class="subtle">Applies to new captures</div>
+                </div>
+                <div class="settings">
+                    <label class="setting">
+                        <span class="setting-copy">
+                            <strong>Auto-copy to clipboard</strong>
+                            <span class="subtle">Copy every new capture immediately.</span>
+                        </span>
+                        <input class="toggle" id="setting-auto-copy" type="checkbox" />
+                    </label>
+                    <label class="setting">
+                        <span class="setting-copy">
+                            <strong>Show capture preview</strong>
+                            <span class="subtle">Display the floating post-capture action card.</span>
+                        </span>
+                        <input class="toggle" id="setting-show-preview" type="checkbox" />
+                    </label>
+                    <label class="setting">
+                        <span class="setting-copy">
+                            <strong>Close popup after actions</strong>
+                            <span class="subtle">Useful when you mostly trigger captures manually.</span>
+                        </span>
+                        <input class="toggle" id="setting-close-popup" type="checkbox" />
+                    </label>
+                </div>
+            </section>
+
+            <section class="panel section">
+                <div class="section-head">
+                    <h2 class="section-title">Recent captures</h2>
+                    <button class="inline-btn" id="clear-history" type="button">Clear history</button>
+                </div>
+                <div class="history-toolbar">
+                    <button class="chip" id="copy-last" type="button">Copy last</button>
+                    <button class="chip" id="download-last" type="button">Download last</button>
+                    <button class="chip" id="preview-last" type="button">Preview last</button>
+                    <button class="chip" id="edit-last" type="button">Edit last</button>
+                </div>
+                <div class="history-grid" id="history-grid">
+                    <div class="empty">No captures yet. Start with a visible tab shot or try a typed command.</div>
+                </div>
+            </section>
         </div>
-        <!-- Common Commands Section -->
-        <div class="px-5 pb-8 relative z-10">
-            <h3 class="text-xs font-bold text-slate-100 uppercase tracking-widest opacity-70 mb-3">Common Commands</h3>
-            <div class="flex flex-wrap gap-2">
-                <div data-command="take screenshot"
-                    class="command-tag px-3 py-1.5 rounded-full glass-premium border-white/5 text-[11px] font-medium text-slate-300 hover:bg-white/10 hover:text-primary cursor-pointer transition-all">
-                    "Take screenshot"
-                </div>
-                <div data-command="capture left side"
-                    class="command-tag px-3 py-1.5 rounded-full glass-premium border-white/5 text-[11px] font-medium text-slate-300 hover:bg-white/10 hover:text-primary cursor-pointer transition-all">
-                    "Capture left side"
-                </div>
-                <div data-command="show gallery"
-                    class="command-tag px-3 py-1.5 rounded-full glass-premium border-white/5 text-[11px] font-medium text-slate-300 hover:bg-white/10 hover:text-primary cursor-pointer transition-all">
-                    "Show gallery"
-                </div>
-            </div>
-        </div>
-    </div>
-    <script type="module" src="popup.js"></script>
+    </main>
 </body>
 
 </html>

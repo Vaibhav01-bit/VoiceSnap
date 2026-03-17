@@ -14,7 +14,7 @@ document.getElementById('grant-btn').addEventListener('click', async () => {
         chrome.storage.local.set({ errorState: null });
 
         // Notify background script to start voice recognition immediately
-        chrome.runtime.sendMessage({ type: 'START_VOICE' });
+        chrome.runtime.sendMessage({ type: 'VOICE_LISTENING_ENABLE' });
 
         // Auto-close tab after 2 seconds
         setTimeout(() => {

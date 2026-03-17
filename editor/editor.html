@@ -1,95 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>VoiceSnap Editor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
+        :root {
+            color-scheme: dark;
+            --bg: #041321;
+            --panel: rgba(9, 23, 38, 0.86);
+            --line: rgba(125, 211, 252, 0.14);
+            --line-strong: rgba(125, 211, 252, 0.28);
+            --text: #e0f2fe;
+            --muted: #89a6bf;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            background: #020617;
-            color: #e5e7eb;
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 34%),
+                linear-gradient(180deg, #03111d 0%, #041827 100%);
         }
-        header {
-            padding: 10px 16px;
+
+        h1,
+        p {
+            margin: 0;
+        }
+
+        .topbar {
+            margin: 18px;
+            padding: 16px 18px;
+            display: grid;
+            gap: 14px;
+            border-radius: 22px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            box-shadow: 0 22px 44px rgba(0, 0, 0, 0.32);
+            backdrop-filter: blur(14px);
+        }
+
+        .topbar-head {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #1f2937;
-            background: #020617;
+            gap: 12px;
+            align-items: start;
         }
-        header h1 {
-            margin: 0;
-            font-size: 16px;
-            background: linear-gradient(to right, #22d3ee, #818cf8);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+
+        .eyebrow {
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
         }
+
+        h1 {
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .subtle {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
         .toolbar {
             display: flex;
-            gap: 6px;
+            gap: 10px;
+            flex-wrap: wrap;
             align-items: center;
         }
-        .tool-btn {
+
+        .tool-btn,
+        .field,
+        .swatch {
+            border: 1px solid var(--line);
+            background: rgba(4, 19, 33, 0.72);
+            color: var(--text);
             border-radius: 999px;
-            border: 1px solid #1f2937;
-            padding: 4px 10px;
-            font-size: 11px;
-            background: #020617;
-            color: #e5e7eb;
+            font: inherit;
+        }
+
+        .tool-btn {
+            padding: 9px 13px;
             cursor: pointer;
         }
+
         .tool-btn.active {
-            border-color: #22d3ee;
-            background: rgba(34,211,238,0.08);
+            border-color: var(--line-strong);
+            background: rgba(56, 189, 248, 0.12);
         }
-        .tool-btn:hover {
-            border-color: #22d3ee;
+
+        .field {
+            padding: 9px 13px;
         }
-        .main {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: radial-gradient(circle at top, rgba(37,99,235,0.2), transparent 55%);
+
+        .field.text {
+            min-width: 180px;
         }
+
+        .swatch {
+            width: 42px;
+            height: 42px;
+            padding: 4px;
+        }
+
+        .workspace {
+            padding: 0 18px 18px;
+            display: grid;
+        }
+
+        .stage {
+            border-radius: 22px;
+            border: 1px solid var(--line);
+            background:
+                linear-gradient(45deg, rgba(15, 23, 42, 0.7) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(15, 23, 42, 0.7) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, rgba(15, 23, 42, 0.7) 75%),
+                linear-gradient(-45deg, transparent 75%, rgba(15, 23, 42, 0.7) 75%),
+                rgba(4, 19, 33, 0.82);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+            overflow: auto;
+            box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
+        }
+
         .canvas-wrapper {
             position: relative;
-            box-shadow: 0 24px 60px rgba(0,0,0,0.8);
-            border-radius: 16px;
+            width: fit-content;
+            margin: 24px auto;
+            border-radius: 18px;
             overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.42);
         }
+
         canvas {
             display: block;
+            max-width: 100%;
+        }
+
+        #overlay {
+            position: absolute;
+            left: 0;
+            top: 0;
         }
     </style>
 </head>
+
 <body>
-    <header>
-        <h1>VoiceSnap Editor</h1>
+    <header class="topbar">
+        <div class="topbar-head">
+            <div>
+                <div class="eyebrow">Editor</div>
+                <h1>VoiceSnap Editor</h1>
+                <p class="subtle">Annotate, redact, label, undo changes, and save edited versions back into your history.</p>
+            </div>
+            <p class="subtle">Shortcuts: <strong>Ctrl/Cmd + Z</strong> undo, <strong>Esc</strong> cancel shape</p>
+        </div>
+
         <div class="toolbar">
-            <button class="tool-btn" data-tool="arrow">Arrow</button>
-            <button class="tool-btn" data-tool="rect">Rect</button>
-            <button class="tool-btn" data-tool="highlight">Highlight</button>
-            <button class="tool-btn" data-tool="blur">Blur</button>
-            <button class="tool-btn" data-tool="text">Text</button>
-            <button class="tool-btn" id="copy-btn">Copy</button>
-            <button class="tool-btn" id="download-btn">Download</button>
+            <button class="tool-btn" data-tool="arrow" type="button">Arrow</button>
+            <button class="tool-btn" data-tool="rect" type="button">Rect</button>
+            <button class="tool-btn" data-tool="highlight" type="button">Highlight</button>
+            <button class="tool-btn" data-tool="blur" type="button">Redact</button>
+            <button class="tool-btn" data-tool="text" type="button">Text</button>
+            <input class="field text" id="text-value" type="text" placeholder="Text label for annotations" />
+            <input class="swatch" id="color-picker" type="color" value="#38bdf8" />
+            <button class="tool-btn" id="undo-btn" type="button">Undo</button>
+            <button class="tool-btn" id="reset-btn" type="button">Reset</button>
+            <button class="tool-btn" id="save-version-btn" type="button">Save version</button>
+            <button class="tool-btn" id="copy-btn" type="button">Copy</button>
+            <button class="tool-btn" id="download-btn" type="button">Download</button>
         </div>
     </header>
-    <div class="main">
-        <div class="canvas-wrapper">
-            <canvas id="base"></canvas>
-            <canvas id="overlay" style="position:absolute;left:0;top:0;"></canvas>
-        </div>
-    </div>
+
+    <main class="workspace">
+        <section class="stage">
+            <div class="canvas-wrapper">
+                <canvas id="base"></canvas>
+                <canvas id="overlay"></canvas>
+            </div>
+        </section>
+    </main>
 
     <script type="module" src="editor.js"></script>
 </body>
+
 </html>
